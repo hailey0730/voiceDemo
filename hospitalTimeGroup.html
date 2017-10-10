@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Continuous scrolling - fullPage.js</title>
+    <meta name="author" content="Matthew Howell" />
+    <meta name="description" content="fullPage continuous scrolling demo." />
+    <meta name="keywords"  content="fullpage,jquery,demo,scroll,loop,continuous" />
+    <meta name="Resource-type" content="Document" />
+
+
+    <link rel="stylesheet" type="text/css" href="assets/css/jquery.fullPage.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/examples.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/hospitalTimeGroup.css" />
+
+    <!--[if IE]>
+        <script type="text/javascript">
+             var console = { log: function() {} };
+        </script>
+    <![endif]-->
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="assets/js/jquery.fullPage.js"></script>
+    <script type="text/javascript" src="assets/js/examples.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      // TODO: Replace with your project's customized code snippet
+      // var config = {
+      //   apiKey: "<API_KEY>",
+      //   authDomain: "<PROJECT_ID>.firebaseapp.com",
+      //   databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
+      //   storageBucket: "<BUCKET>.appspot.com",
+      //   messagingSenderId: "<SENDER_ID>",
+      // };
+      // firebase.initializeApp(config);
+      // Get a reference to the storage service, which is used to create references in your storage bucket
+      // var storage = firebase.storage();
+       var hospitals = [];
+      var display = [];
+      var idleTime = 0;
+      var hospital = sessionStorage.getItem('hospital');
+       $(document).ready(function() {
+
+        // $.ajax({
+        //   method: "GET",
+        //   url: "http://test.drcare.ai/DrCare.ANEWaitingTime.api.php?Key=63ebdad609d02ac15a71bde64fb21f8ea43ac513",
+        // })
+        // .done(function( msg ) {
+        //   var json = JSON.parse(msg);
+        //   for(var i = 0; i < json.length; i++){
+        //     hospitals[i] = json[i];
+        //   }
+
+        filter();
+
+        // $('#fullpage')append(groupHospitals(display));
+
+          $('#fullpage').fullpage({
+              sectionsColor: ['#5dc9dd', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],  //needed to set depending area
+              anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],   //needed to change according num of page
+              menu: '#menu',
+            });
+        // });
+
+          //Increment the idle time counter every minute.
+          var idleInterval = setInterval(timerIncrement, 1000); // 1 second
+
+          //Zero the idle timer on mouse movement.
+          $(this).mousemove(function (e) {
+              idleTime = 0;
+          });
+          $(this).keypress(function (e) {
+              idleTime = 0;
+          });
+            
+        });
+
+       function filter(){
+         display = [];
+        var j = 0;
+        for(var i = 0; i < hospitals.length; i++){
+          if(hospitals[i].地區 == hospital.area){
+            display[j] = hospitals[i];
+            j++;
+          }
+        }
+       }
+
+       function timerIncrement() {
+          idleTime = idleTime + 1;
+          if (idleTime > 10) { // 10 seconds
+              window.location.replace("activeSlide.html");
+          }
+        }
+
+       function groupHospitals(display){
+        var individualHospitals ='';
+        var i = 0 ;
+        while(i < display.length){
+          individualHospitals += '<div class="section " id="section';
+          individualHospitals += i/4;
+          individualHospitals += '"><div class="topTime"><p>';
+          individualHospitals += //最後更新時間 2017年9月20日 下午4時30分
+          individualHospitals += '</p></div><h2>';
+          individualHospitals += obj.地區;//港島區
+          individualHospitals += '醫院</h2><div class="wrapper">';
+          individualHospitals += individualHospital(display[i],i);
+          individualHospitals += individualHospital(display[i+1],i+1);
+          individualHospitals += individualHospital(display[i+2],i+2);
+          individualHospitals += individualHospital(display[i+3],i+3);
+          individualHospitals += '</div>';
+          if(i/4 < (display.length-1)/4){
+            individualHospitals += '<div class="bottom"><h2>';
+            individualHospitals += obj.地區;//港島區
+            individualHospitals += '醫院</h2><img src="assets/imgs/arrow.png"></div>';
+          }
+          individualHospitals += '</div>';
+          i += 4;
+        }
+        return individualHospitals;
+       }
+
+       function individualHospital(obj, i){
+        var hospital = '';
+        if(obj != null){
+          hospital += '<div class="box" id="box';
+          hospital += (i%4) + 1;
+          hospital += '"><div class="name"><h2>';
+          hospital += obj.醫院//東區尤德夫人那打素醫院
+          hospital += '</h2></div><p>現時等候</p><h2 id="num">';
+          hospital += obj.等候時間//2
+          hospital += '</h2><div class="numWords"><span><p>超過小時</p></span></div><ul class="actions"><li><a href="#one" class="button round">附近診所</a></li></ul></div>'; 
+        }
+        return hospital;
+       }
+    </script>
+
+</head>
+<body>
+
+<div id="fullpage">
+    <div class="section " id="section0">
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <h2>港島區醫院</h2>
+    <div class="wrapper">
+      <div class="box" id="box1">
+    <div class="name">
+      <h2>東區尤德夫人那打素醫院</h2>
+    </div>
+      <p>現時等候</p>
+      <h2 id="num">2</h2>
+      <div class="numWords">
+      <span><p>超過小時</p></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+  </div>
+   <div class="box" id="box2">
+    <div class="name">
+      <h2>東區尤德夫人那打素醫院</h2>
+    </div>
+      <p>現時等候</p>
+      <h2 id="num">2</h2>
+      <div class="numWords">
+      <span><p>超過小時</p></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+  </div>
+   <div class="box" id="box3">
+    <div class="name">
+      <h2>東區尤德夫人那打素醫院</h2>
+    </div>
+      <p>現時等候</p>
+      <h2 id="num">2</h2>
+      <div class="numWords">
+      <span><p>超過小時</p></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+  </div>
+   <div class="box" id="box4">
+    <div class="name">
+      <h2>東區尤德夫人那打素醫院</h2>
+    </div>
+      <p>現時等候</p>
+      <h2 id="num">2</h2>
+      <div class="numWords">
+      <span><p>超過小時</p></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+  </div>
+    </div>
+     <div class="bottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+  </div>
+ <!--    <div class="section active" id="section1">
+        <div class="slide" id="slide1">
+            <div class="intro">
+                <h2>Around the world scrolling</h2>
+                <p>Go to the first section and scroll up or to the last one and scroll down to see how it works.</p>
+            </div>
+        </div>
+        <div class="slide active" id="slide2">
+            <h2>Slide 2</h2>
+        </div>
+        <div class="slide" id="slide3">
+            <h2>Slide 3</h2>
+        </div>
+
+    </div>
+    <div class="section" id="section2">
+        <div class="intro">
+            <h2>Scroll Down</h2>
+            <p>And it will animate down to the first section</p>
+        </div>
+    </div> -->
+</div>
+
+</body>
+</html>

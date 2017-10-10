@@ -1,0 +1,51 @@
+.top{
+
+}
+
+#icon{
+	max-width: 10%;
+	float: left;
+	display: inline-block;
+	position: relative;
+	left:2em;
+	top:2em;
+}
+
+.speechbox{
+	position: relative;
+}
+
+#speech{
+	position: absolute;
+	z-index: 5;
+	top: 1em;
+	max-width: 70%;
+	left:5em;
+}
+
+#textbox{
+	max-width: 80%;
+	/*position: relative;	*/
+}
+
+.mainPageTitle{
+	padding-top: 58em;
+}
+
+.mainPageTitle > h1, .mainPageTitle > h2{
+	font-weight: bold;
+}
+
+.mic{
+	margin-top: 1em;
+}
+
+#micpic{
+	max-width: 10em;
+}
+
+#section0Main{
+	background-image: url('../imgs/voiceDemoBg.png');
+	background-size: cover;
+}
+

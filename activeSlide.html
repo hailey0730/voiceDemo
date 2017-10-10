@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Continuous scrolling - fullPage.js</title>
+    <meta name="author" content="Matthew Howell" />
+    <meta name="description" content="fullPage continuous scrolling demo." />
+    <meta name="keywords"  content="fullpage,jquery,demo,scroll,loop,continuous" />
+    <meta name="Resource-type" content="Document" />
+
+
+    <link rel="stylesheet" type="text/css" href="assets/css/jquery.fullPage.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/examples.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/custom.css" />
+
+    <!--[if IE]>
+        <script type="text/javascript">
+             var console = { log: function() {} };
+        </script>
+    <![endif]-->
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="assets/js/jquery.fullPage.js"></script>
+    <script type="text/javascript" src="assets/js/examples.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase-database.js"></script>
+    <script>
+      // Initialize Firebase
+      // TODO: Replace with your project's customized code snippet
+       var config = {
+          apiKey: "AIzaSyCxVVkDBoF00IYItJ2QXsSPPAvZFivrOiU",
+          authDomain: "hospitaltime-60dc9.firebaseapp.com",
+          databaseURL: "https://hospitaltime-60dc9.firebaseio.com",
+          projectId: "hospitaltime-60dc9",
+          storageBucket: "",
+          messagingSenderId: "972994545990"
+        };
+        firebase.initializeApp(config);
+      // Get a reference to the storage service, which is used to create references in your storage bucket
+      var database = firebase.database();
+      var hospital = {name: '', area:''};
+      $(document).ready(function() {
+            $('#fullpage').fullpage({
+              sectionsColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],
+              anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],
+              menu: '#menu',
+            });
+        });
+
+      var starCountRef = firebase.database().ref('test/inner-test');
+      starCountRef.on('value', function(snapshot) {
+        $('#speech').text(snapshot.val().superinnertest);
+      });
+
+      var action = firebase.database().ref();
+      action.on('value',function(snapshot){
+        if(snapshot.val().action == 'hospitalTime'){
+          hospital.name = '東區尤德夫人那打素醫院';
+          showTime(hospital);
+        }else if(snapshot.val().action == 'hospitalTimeGroup'){
+          hospital.area = '港島區';
+          showTime(hospital);
+        }
+      });
+       
+
+      //need to be call somewhere
+      function showTime(hospital){
+        window.sessionStorage.setItem('hospital', hospital);
+        if(hospital.name == ''){
+          window.location.replace("hospitalTimeGroup.html");
+        }else{
+          window.location.replace("hospitalTime.html");
+        }
+      }
+    </script>
+
+</head>
+<body>
+
+<div id="fullpage">
+    <div class="section " id="section0Main">
+      <div class="top">
+        <img id="icon" src="assets/imgs/Icon.png">
+        <div class="speechbox">
+        <p id="speech"></p>
+        <img id="textbox" src="assets/imgs/Text box.png">
+        </div>
+      </div>
+      <div class="mainPageTitle">
+        <h2>實時</h2>
+        <h1>全港急症室等候時間</h1>
+        <h2>語音查詢</h2>
+        <div class="mic">
+          <img id="micpic" src="assets/imgs/Group 2.png">
+        </div>
+      </div>
+    </div>
+    
+</div>
+
+</body>
+</html>
