@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Continuous scrolling - fullPage.js</title>
+    <meta name="author" content="Matthew Howell" />
+    <meta name="description" content="fullPage continuous scrolling demo." />
+    <meta name="keywords"  content="fullpage,jquery,demo,scroll,loop,continuous" />
+    <meta name="Resource-type" content="Document" />
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" type="text/css" href="assets/css/jquery.fullPage.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/examples.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/custom.css" />
+
+    <!-- hospitalTime -->
+    <link rel="stylesheet" type="text/css" href="assets/css/hospitalTime.css" />
+
+<!-- hospitalTimeGroup -->
+    <link rel="stylesheet" type="text/css" href="assets/css/hospitalTimeGroup.css" />
+
+    <!--[if IE]>
+        <script type="text/javascript">
+             var console = { log: function() {} };
+        </script>
+    <![endif]-->
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="assets/js/jquery.fullPage.js"></script>
+    <script type="text/javascript" src="assets/js/examples.js"></script>
+    <script type="text/javascript" src="assets/jquery-visible-master/jquery.visible.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase-database.js"></script>
+    <script>
+      // Initialize Firebase
+      // TODO: Replace with your project's customized code snippet
+        var config = {
+          apiKey: "AIzaSyBIm7VKfDgggvI4Llek7fNnZbtmvQcxko0",
+          authDomain: "asiabots-aidd.firebaseapp.com",
+          databaseURL: "https://asiabots-aidd.firebaseio.com",
+          projectId: "asiabots-aidd",
+          storageBucket: "asiabots-aidd.appspot.com",
+          messagingSenderId: "848692072997"
+        };
+        firebase.initializeApp(config);
+      // Get a reference to the storage service, which is used to create references in your storage bucket
+      var database = firebase.database();
+      var hospital = {name: '', area:'', time1:'', time2:''};
+      var hospitals = [];   //{District: '', Name: '', WaitingTime1: '', WaitingTime2:''}
+      var display = [];
+      var idleTime = 0;
+
+      $(document).ready(function() {
+       //Increment the idle time counter every second.
+          var idleInterval = setInterval(timerIncrement, 1000); // 1 second     
+        
+      // var starCountRef = firebase.database().ref();
+      // starCountRef.on('value', function(snapshot) {
+      //   $('#speech').text(snapshot.val().Saying);
+      // });
+     
+      var hospitalsRef = firebase.database().ref('Hospital');
+        hospitalsRef.on('value',function(snapshot){
+          var i = 0;
+          snapshot.forEach(function(hosp){
+            hospitals[i] = hosp.val();
+            i++;
+          });
+
+          // $('.section').each(function(i,obj){
+          //     var id = this.id;
+          //     if(id != 'section0Main'){
+          //       $(this).remove();
+          //     }
+          //   });
+
+           $('.section').each(function(i,obj){
+             var id = this.id;
+              if(id != 'section0Main'){
+                var temp = $(this).children();
+                var temp2 = $($(temp[0]).children()).children();
+                  // console.log($(temp2[1]).text());  //name
+                  // console.log($(temp2[3]).text());  //time2
+                  // console.log($($($(temp2[4]).children())).children());  //estimate
+                  // console.log($(temp2[6]).text());  //area
+
+                  $(temp2[1]).text(hospitals[i-1].Name);
+                  $(temp2[3]).text(hospitals[i-1].WaitingTime2);
+                  var estimate = hospitals[i-1].WaitingTime1;
+                  estimate += '小時';
+                  $($($(temp2[4]).children())).children().text(estimate);
+                  var btm = hospitals[i-1].District;
+                  btm += '區醫院';
+                  $(temp2[6]).text(btm);
+                  if(i == 3 || i == 7 || i == 18){
+                    $(temp2[6]).css('opacity', '0');
+                    $(temp2[7]).css('opacity', '0');
+                  }
+                }
+          });
+
+  // var action = firebase.database().ref('Action');
+  //     action.on('value',function(snapshot){
+  //       if(snapshot.val().Hospital != ''){
+  //         hospital.name = snapshot.val().Hospital;
+  //         hospital.area = snapshot.val().District;
+  //         reorder();
+  //         showTime();
+  //       }else if(snapshot.val().District != ''){
+  //         console.log("switch page");
+  //         hospital.area = snapshot.val().District;
+  //         window.location.replace("hospitalTimeGroup.html");
+  //       }
+
+  //       $('.topTime').each(function(i,obj){
+  //         var x = $(this).children();
+  //         var lastUpdateTime = '最後更新時間 ';
+  //         lastUpdateTime += snapshot.val().LastUpdateTime;
+  //         $(x).text(lastUpdateTime);
+  //       });
+         
+       
+  //     });
+      });
+
+      var action = firebase.database().ref('Action');
+      action.on('value',function(snapshot){
+        if(snapshot.val().Hospital != null){
+          hospital.name = snapshot.val().Hospital;
+          hospital.area = snapshot.val().District;
+          reorder();
+          showTime();
+        }else if(snapshot.val().District != null){
+          console.log("switch page");
+          hospital.area = snapshot.val().District;
+          window.sessionStorage.setItem('hospital', hospital);
+          window.location.replace("hospitalTimeGroup.html");
+        }
+
+        $('.topTime').each(function(i,obj){
+          var x = $(this).children();
+          var lastUpdateTime = '最後更新時間 ';
+          lastUpdateTime += snapshot.val().LastUpdateTime;
+          $(x).text(lastUpdateTime);
+        });
+         $('#speech').text(snapshot.val().Saying);
+       
+      });
+         
+
+          //Zero the idle timer on mouse movement.
+          $(this).mousemove(function (e) {
+              idleTime = 0;
+          });
+          $(this).keypress(function (e) {
+              idleTime = 0;
+          });
+
+          window.onscroll = function(e){
+            idleTime = 0;
+          }
+
+
+        var secColor = '';
+        var j = 18;
+        // if(hospital.area == '港島'){
+        //   secColor = '#5dc9dd';
+        //   j = 3;
+        // }else if(hospital.area == '九龍'){
+        //   secColor = '#de6565';
+        //   j = 4;
+        // }else if(hospital.area == '新界'){
+        //   secColor = '#7fb533';
+        //   j = 11;
+        // }
+
+        var sections = [];
+        var anchorList = [];
+        sections[0] = 'rgb(255,231,0)';
+        anchorList[0] = 'firstPage';
+        for(var i = 1; i < j+1; i++){
+          if(i<4){
+            sections[i] = "#5dc9dd";
+          }else if(i == 4 || i < 8){
+            sections[i] = "#de6565";
+          }else{
+            sections[i] = "#7fb535";
+          }
+          
+          if(i == j){
+            anchorList[i] = 'lastPage';
+          }else{
+            var page = '';
+            page += i+1;
+            page += 'Page';
+            anchorList[i] = page; 
+          }
+        }
+
+      $('#fullpage').fullpage({
+              sectionsColor: sections,
+              anchors: anchorList,
+              // sectionsColor: ['#5dc9dd', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],  //needed to set depending area
+              // anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],   //needed to change according num of page
+              menu: '#menu',
+            });
+
+});
+
+      //need to be call somewhere
+      function showTime(){
+        // window.sessionStorage.setItem('hospital', hospital);
+        if(hospital.area == '港島'){
+          $('html,body').animate({        
+            scrollTop:$('#section0').offset().top}, 'slow');
+        }else if(hospital.area == '九龍'){
+          $('html,body').animate({        
+           scrollTop:$('#section3').offset().top}, 'slow');
+        }else if(hospital.area == '新界'){
+          $('html,body').animate({        
+           scrollTop:$('#section7').offset().top}, 'slow');
+        }
+         
+          idleTime = 0;
+
+      }
+
+      function reorder(){
+       var tempHosp = {name:'', area:'', time1:'', time2:''};
+       var districtNum = 0;
+        if(hospital.area == '港島'){
+          districtNum = 1;
+        }else if( hospital.area == '九龍'){
+          districtNum = 4;
+        }else if(hospital.area == '新界'){
+          districtNum = 8;
+        }
+
+          $('.section').each(function(i,obj){
+             var id = this.id;
+              if(id != 'section0Main'){
+              var temp = $(this).children();
+              var temp2 = $($(temp[0]).children()).children();
+              // console.log($(temp2[1]).text());  //name
+              // console.log($(temp2[3]).text());  //time2
+              // console.log($($($(temp2[4]).children())).children());  //estimate
+              // console.log($(temp2[6]).text());  //area
+              var hospName = $(temp2[1]).text();
+              var waitTime = $(temp2[3]).text();
+            if(i == districtNum){
+              if(hospName != hospital.name){
+                tempHosp.name = hospName;
+                tempHosp.time2 = waitTime;
+                tempHosp.time1 = $($($(temp2[4]).children())).children().text();
+                // console.log(hospital.name);
+                $(temp2[1]).text(hospital.name);
+                for(var i = 0; i < hospitals.length; i++){
+                  if(hospitals[i].Name == hospital.name){
+                    hospital.time2 = hospitals[i].WaitingTime2;
+                    hospital.time1 = hospitals[i].WaitingTime1;
+                    break;
+                  }
+                }
+                $(temp2[3]).text(hospital.time2);
+                var estimate = hospital.time1;
+                  estimate += '小時';
+                  $($($(temp2[4]).children())).children().text(estimate);
+
+              }else{
+                return false;
+              }
+            }else{
+              if(tempHosp.name != '' && hospName == hospital.name){
+               $(temp2[1]).text(tempHosp.name);
+               $(temp2[3]).text(tempHosp.time2);
+               var estimate = tempHosp.time1;
+                $($($(temp2[4]).children())).children().text(estimate);
+                return false;
+              }
+            }
+          }
+          });
+
+            
+       }
+
+                         
+
+      document.onclick = function (argument) {
+          var conf = confirm("Fullscreen mode?");
+          var docelem = document.documentElement;
+
+          if (conf == true) {
+              if (docelem.requestFullscreen) {
+                  docelem.requestFullscreen();
+              }
+              else if (docelem.mozRequestFullScreen) {
+                  docelem.mozRequestFullScreen();
+              }
+              else if (docelem.webkitRequestFullScreen) {
+                  docelem.webkitRequestFullScreen();
+              }
+              else if (docelem.msRequestFullscreen) {
+                  docelem.msRequestFullscreen();
+              }
+          }
+      }
+
+      function timerIncrement() {
+          idleTime = idleTime + 1;
+          console.log(idleTime);
+          if (idleTime > 5) { // 10 seconds
+            console.log(idleTime);
+            if(!$('#section0Main').visible()){
+              $('html,body').animate({        //move to top
+              scrollTop:$('#section0Main').offset().top}, 'slow');
+              // $("html, body").animate({ scrollTop: 0 }, "slow");
+            }
+          }
+        }
+    </script>
+
+</head>
+<body>
+
+<div id="fullpage">
+    <div class="section " id="section0Main">
+      <div class="top">
+        <img id="icon" src="assets/imgs/Icon.png">
+        <div class="speechbox">
+        <p id="speech"></p>
+        <img id="textbox" src="assets/imgs/Text box.png">
+        </div>
+      </div>
+      <div class="mainPageTitle">
+        <h2>實時</h2>
+        <h1>全港急症室等候時間</h1>
+        <h2>語音查詢</h2>
+        <div class="mic">
+          <img id="micpic" src="assets/imgs/Group 2.png">
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="section " id="section0">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+  <div class="section " id="section1">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section2">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section3">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section4">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section5">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+  <div class="section " id="section6">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section7">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section8">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section9">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section10">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+  <div class="section " id="section11">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section12">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section13">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section14">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section15">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+  <div class="section " id="section16">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+  <div class="section " id="section17">
+      
+      <div class="topTime">
+      <p>最後更新時間 2017年9月20日 下午4時30分</p>
+    </div>
+    <div class="individualName">
+      <h1>東區尤德夫人那打素醫院</h1>
+    </div>
+    <div class="main">
+      <h2>現時等候</h2>
+      <h1 id="individualNum">2</h1>
+      <div class="individualNumWords">
+      <span><h2>超過小時</h2></span>
+    </div>
+      <ul class="actions">
+        <li><a href="#one" class="button round">附近診所</a></li>
+      </ul>
+    </div>
+      <div class="individualBottom">
+      <h2>港島區醫院</h2>
+      <img src="assets/imgs/arrow.png">
+    </div>
+    
+  </div>
+
+</div>
+
+</body>
+</html>

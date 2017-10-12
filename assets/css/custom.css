@@ -1,3 +1,4 @@
+
 .top{
 
 }
@@ -16,11 +17,14 @@
 }
 
 #speech{
+	font-family: 'Hiragino';
 	position: absolute;
 	z-index: 5;
 	top: 1em;
 	max-width: 70%;
 	left:5em;
+	color: black;
+	font-size: 2em;
 }
 
 #textbox{
@@ -34,6 +38,11 @@
 
 .mainPageTitle > h1, .mainPageTitle > h2{
 	font-weight: bold;
+	font-family: 'Hiragino';
+	color: black;
+}
+.mainPageTitle > h2{
+	font-size: 4em;
 }
 
 .mic{
@@ -45,7 +54,13 @@
 }
 
 #section0Main{
-	background-image: url('../imgs/voiceDemoBg.png');
+	background-image: url('../imgs/voiceDemoBg(noIconTextbox).png');
+	/*background-image: url('../imgs/voiceDemoBg.png');*/
 	background-size: cover;
+	background-repeat: no-repeat;
 }
 
+@font-face {
+    font-family: 'Hiragino'; /*a name to be used later*/
+    src:url('copyfonts.com_hirakakustd-w8-opentype.otf'); /*URL to font*/
+}

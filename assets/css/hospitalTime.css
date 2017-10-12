@@ -1,4 +1,6 @@
-
+h1, h2, h3, h4, p , span{
+	font-family: 'avenir';
+}
 
 .topTime{
 	
@@ -9,18 +11,18 @@
 	padding: 8em 0;
 }
 
-.name{
+.individualName{
 	margin: 5em 10em;
 	
 }
 
-#num{
+#individualNum{
 	font-size: 15em;
 	display: inline-block;
 	margin:25px;
 }
 
-.numWords{
+.individualNumWords{
 	display: inline-block;
 	max-width: 8em;
 }
@@ -29,7 +31,7 @@
 	margin: 5em auto;
 }
 
-.bottom{
+.individualBottom{
 	margin-top: 5em;
 }
 
@@ -40,6 +42,10 @@ img{
 
 h1, h2, h3, h4, h5, p{
 	color: white;
+}
+
+.main > h2, .individualNumWords > span > h2, .individualBottom > h2{
+	font-size: 4em;
 }
 
 p{
@@ -141,7 +147,7 @@ p{
 	input[type="reset"],
 	input[type="button"],
 	button,
-	.button {
+	.button.round {
 		background-color: transparent;
 		box-shadow: inset 0 0 0 2px white;
 		/*box-shadow: inset 0 0 0 1px rgba(144, 144, 144, 0.25);*/
@@ -210,3 +216,9 @@ p{
 			.button.special:active {
 				background-color: #46bcd1;
 			}
+
+@font-face {
+    font-family: 'avenir'; /*a name to be used later*/
+    src:url('Avenir/Avenir LT 35 Light.ttf'); /*URL to font*/
+    /*src:url('Avenir-Free/Avenir-Free/AvenirLTStd-Light.otf'); /*URL to font*/*/
+}

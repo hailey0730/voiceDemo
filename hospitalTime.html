@@ -29,40 +29,90 @@
     <script>
       // Initialize Firebase
       // TODO: Replace with your project's customized code snippet
-      // var config = {
-      //   apiKey: "<API_KEY>",
-      //   authDomain: "<PROJECT_ID>.firebaseapp.com",
-      //   databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
-      //   storageBucket: "<BUCKET>.appspot.com",
-      //   messagingSenderId: "<SENDER_ID>",
-      // };
-      // firebase.initializeApp(config);
+       var config = {
+          apiKey: "AIzaSyCxVVkDBoF00IYItJ2QXsSPPAvZFivrOiU",
+          authDomain: "hospitaltime-60dc9.firebaseapp.com",
+          databaseURL: "https://hospitaltime-60dc9.firebaseio.com",
+          projectId: "hospitaltime-60dc9",
+          storageBucket: "",
+          messagingSenderId: "972994545990"
+        };
+        firebase.initializeApp(config);
       // Get a reference to the storage service, which is used to create references in your storage bucket
-      // var storage = firebase.storage();
+      var storage = firebase.storage();
 
       var hospitals = [];
       var display = [];
       var idleTime = 0;
-      var hospital = sessionStorage.getItem('hospital');
+      var hospital = {name: '', area:''};
+
        $(document).ready(function() {
 
-      var starCountRef = firebase.database().ref('test/inner-test');
-      starCountRef.on('value', function(snapshot) {
-        //get all hospital from firebase
-      });
+        var action = firebase.database().ref('action');
+        action.on('value',function(snapshot){
+          if(snapshot.val().name != ''){
+            hospital.name = snapshot.val().name;
+            hospital.area = snapshot.val().area;
+          }else if(snapshot.val().area != ''){
+            hospital.area = snapshot.val().area;
+          }
+        });
 
-        //   filter();
+        var hospitalsRef = firebase.database().ref('hospitals');
+        hospitalsRef.on('value',function(snapshot){
+          var i = 0;
+          snapshot.forEach(function(hosp){
+            hospitals[i] = hosp.val();
+            i++;
+          });
+          display = filter();
 
-        // $('#fullpage')append(individualHospitals(display));
+        $('#fullpage').append(individualHospitals(display));
+
+        var secColor = '';
+        var j = 0;
+        if(hospital.area == '港島'){
+          secColor = '#5dc9dd';
+          j = 3;
+        }else if(hospital.area == '九龍'){
+          secColor = '#de6565';
+          j = 4;
+        }else if(hospital.area == '新界'){
+          secColor = '#7fb533';
+          j = 11;
+        }
+
+        var sections = [];
+        var anchorList = [];
+        for(var i = 0; i < j; i++){
+          sections[i] = secColor;
+          if(i == 0){
+            anchorList[i] = 'firstPage';
+          }else if(i == j-1){
+            anchorList[i] = 'lastPage';
+          }else{
+            var page = '';
+            page += i+1;
+            page += 'Page';
+            anchorList[i] = page; 
+          }
+        }
 
           $('#fullpage').fullpage({
-              sectionsColor: ['#5dc9dd', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],  //needed to set depending area
-              anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],   //needed to change according num of page
+              sectionsColor: sections,
+              anchors: anchorList,
+              // sectionsColor: ['#5dc9dd', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],  //needed to set depending area
+              // anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],   //needed to change according num of page
               menu: '#menu',
             });
+        });
+
       
 
-          //Increment the idle time counter every minute.
+       
+      
+
+          //Increment the idle time counter every second.
           var idleInterval = setInterval(timerIncrement, 1000); // 1 second
 
           //Zero the idle timer on mouse movement.
@@ -80,24 +130,23 @@
         });
 
        function filter(){
-        display = [];
+        var temp = [];
         for(var i = 0; i < hospitals.length; i++){
-          if(hospitals[i].醫院 == hospital.name){
-            display[0] = hospitals[i];
-            hospital.area = display[0].地區;
+          if(hospitals[i].name == hospital.name){
+            temp[0] = hospitals[i];
             break;
           }
         }
         var j = 1;
         for(var i = 0; i < hospitals.length; i++){
-          if(hospitals[i].醫院 != hospital.name){
-          if(hospitals[i].地區 == hospital.area){
-            display[j] = hospitals[i];
+          if(hospitals[i].name != hospital.name){
+          if(hospitals[i].area == hospital.area){
+            temp[j] = hospitals[i];
             j++;
           }
         }
         }
-
+        return temp;
        }
 
        function individualHospitals(display){
@@ -114,15 +163,15 @@
 
        function individualHospital(obj, i){
         var hospital = '<div class="topTime"><p>';
-        hospital += //最後更新時間 2017年9月20日 下午4時30分
+        hospital += '最後更新時間 2017年9月20日 下午4時30分';
         hospital += '</p></div><div class="name"><h1>';
-        hospital += obj.醫院; //東區尤德夫人那打素醫院
+        hospital += obj.name; //東區尤德夫人那打素醫院
         hospital += '</h1></div><div class="main"><h2>現時等候</h2><h1 id="num">';
-        hospital += obj.等候時間//2
+        hospital += obj.waitingTime//2
         hospital += '</h1><div class="numWords"><span><h2>超過小時</h2></span></div><ul class="actions"><li><a href="#one" class="button round">附近診所</a></li></ul></div>';
         if(i < display.length-1){
           hospital += '<div class="bottom"><h2>';
-          hospital += obj.地區;//港島區
+          hospital += obj.area;//港島區
           hospital += '醫院</h2><img src="assets/imgs/arrow.png"></div>';
         }
 
@@ -131,9 +180,9 @@
 
        function timerIncrement() {
           idleTime = idleTime + 1;
-          if (idleTime > 10) { // 10 seconds
-              window.location.replace("activeSlide.html");
-          }
+          // if (idleTime > 30) { // 10 seconds
+          //     window.location.replace("activeSlide.html");
+          // }
         }
     </script>
 
@@ -141,7 +190,7 @@
 <body>
 
 <div id="fullpage">
-    <div class="section " id="section0">
+    <!-- <div class="section " id="section0">
       
       <div class="topTime">
       <p>最後更新時間 2017年9月20日 下午4時30分</p>
@@ -188,7 +237,7 @@
       <img src="assets/imgs/arrow.png">
     </div>
     
-  </div>
+  </div> -->
   <!--   <div class="section active" id="section1">
         <div class="slide" id="slide1">
             <div class="intro">

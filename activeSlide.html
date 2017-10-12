@@ -8,12 +8,12 @@
     <meta name="description" content="fullPage continuous scrolling demo." />
     <meta name="keywords"  content="fullpage,jquery,demo,scroll,loop,continuous" />
     <meta name="Resource-type" content="Document" />
-
+    <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="stylesheet" type="text/css" href="assets/css/jquery.fullPage.css" />
     <link rel="stylesheet" type="text/css" href="assets/css/examples.css" />
     <link rel="stylesheet" type="text/css" href="assets/css/custom.css" />
-
+<link rel="stylesheet" type="text/css" href="assets/css/hospitalTime.css" />
     <!--[if IE]>
         <script type="text/javascript">
              var console = { log: function() {} };
@@ -31,38 +31,40 @@
     <script>
       // Initialize Firebase
       // TODO: Replace with your project's customized code snippet
-       var config = {
-          apiKey: "AIzaSyCxVVkDBoF00IYItJ2QXsSPPAvZFivrOiU",
-          authDomain: "hospitaltime-60dc9.firebaseapp.com",
-          databaseURL: "https://hospitaltime-60dc9.firebaseio.com",
-          projectId: "hospitaltime-60dc9",
-          storageBucket: "",
-          messagingSenderId: "972994545990"
+        var config = {
+          apiKey: "AIzaSyBIm7VKfDgggvI4Llek7fNnZbtmvQcxko0",
+          authDomain: "asiabots-aidd.firebaseapp.com",
+          databaseURL: "https://asiabots-aidd.firebaseio.com",
+          projectId: "asiabots-aidd",
+          storageBucket: "asiabots-aidd.appspot.com",
+          messagingSenderId: "848692072997"
         };
         firebase.initializeApp(config);
       // Get a reference to the storage service, which is used to create references in your storage bucket
       var database = firebase.database();
       var hospital = {name: '', area:''};
+
       $(document).ready(function() {
             $('#fullpage').fullpage({
-              sectionsColor: ['#1bbc9b', '#4BBFC3', '#7BAABE', 'whitesmoke', '#ccddff'],
+              sectionsColor: ['rgb(255,231,0)'],
               anchors: ['firstPage', 'secondPage', '3rdPage', '4thpage', 'lastPage'],
               menu: '#menu',
             });
         });
 
-      var starCountRef = firebase.database().ref('test/inner-test');
+      // var starCountRef = firebase.database().ref('test/inner-test');
+      var starCountRef = firebase.database().ref();
       starCountRef.on('value', function(snapshot) {
-        $('#speech').text(snapshot.val().superinnertest);
+        $('#speech').text(snapshot.val().Saying);
       });
 
-      var action = firebase.database().ref();
+      var action = firebase.database().ref('action');
       action.on('value',function(snapshot){
-        if(snapshot.val().action == 'hospitalTime'){
-          hospital.name = '東區尤德夫人那打素醫院';
+        if(snapshot.val().name != ''){
+          hospital.name = snapshot.val().name;
           showTime(hospital);
-        }else if(snapshot.val().action == 'hospitalTimeGroup'){
-          hospital.area = '港島區';
+        }else if(snapshot.val().area != ''){
+          hospital.area = snapshot.val().area;
           showTime(hospital);
         }
       });
@@ -70,12 +72,32 @@
 
       //need to be call somewhere
       function showTime(hospital){
-        window.sessionStorage.setItem('hospital', hospital);
+        // window.sessionStorage.setItem('hospital', hospital);
         if(hospital.name == ''){
-          window.location.replace("hospitalTimeGroup.html");
+          // window.location.replace("hospitalTimeGroup.html");
         }else{
-          window.location.replace("hospitalTime.html");
+          // window.location.replace("hospitalTime.html");
         }
+      }
+
+      document.onclick = function (argument) {
+          var conf = confirm("Fullscreen mode?");
+          var docelem = document.documentElement;
+
+          if (conf == true) {
+              if (docelem.requestFullscreen) {
+                  docelem.requestFullscreen();
+              }
+              else if (docelem.mozRequestFullScreen) {
+                  docelem.mozRequestFullScreen();
+              }
+              else if (docelem.webkitRequestFullScreen) {
+                  docelem.webkitRequestFullScreen();
+              }
+              else if (docelem.msRequestFullscreen) {
+                  docelem.msRequestFullscreen();
+              }
+          }
       }
     </script>
 
@@ -98,9 +120,9 @@
         <div class="mic">
           <img id="micpic" src="assets/imgs/Group 2.png">
         </div>
+        
       </div>
     </div>
-    
 </div>
 
 </body>
